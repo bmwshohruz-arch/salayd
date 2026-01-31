@@ -29,8 +29,14 @@
   }
 }
 </script>
+<script>
+    // Netlify-da deployment qilinganda 'process.env' xatoligini oldini olish
+    window.process = window.process || { env: {} };
+</script>
 </head>
 <body>
     <div id="root"></div>
+    <!-- Asosiy dastur modulini yuklash -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
