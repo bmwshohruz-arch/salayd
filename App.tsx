@@ -4,7 +4,7 @@ import {
   Upload, FileText, Layout, Download, FileSpreadsheet, 
   CheckCircle, Loader2, PlayCircle, Eye, Trash2, 
   ChevronLeft, ChevronRight, Share2, Sparkles, 
-  Lock, Settings, X, Save, History, Clock
+  Lock, Settings, X, Save, History, Clock, Home, ArrowLeft
 } from 'lucide-react';
 import { Slide, Presentation, SiteSettings } from './types';
 import { extractTextFromDocx, extractTextFromXlsx } from './lib/fileParsers';
@@ -200,12 +200,16 @@ const App: React.FC = () => {
     }
   };
 
+  const goHome = () => {
+    setFile(null);
+    setPresentation(null);
+    setStatus('');
+    setActiveSlide(0);
+  };
+
   const reset = () => {
-    if (confirm("Haqiqatan ham yangi taqdimot boshlamoqchimisiz?")) {
-      setFile(null);
-      setPresentation(null);
-      setStatus('');
-      setActiveSlide(0);
+    if (confirm("Haqiqatan ham ushbu taqdimotni yopib, yangisini boshlamoqchimisiz?")) {
+      goHome();
     }
   };
 
@@ -331,7 +335,7 @@ const App: React.FC = () => {
 
       <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
         <div className="max-w-screen-2xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={goHome}>
             <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200">
               <Sparkles size={28} fill="currentColor" />
             </div>
@@ -362,6 +366,14 @@ const App: React.FC = () => {
             
             {presentation && (
               <>
+                <button 
+                  onClick={goHome} 
+                  className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-5 py-2.5 rounded-2xl font-black transition-all border border-indigo-100"
+                  title="Bosh sahifa"
+                >
+                  <Home size={18} /> <span className="hidden md:inline">Bosh sahifa</span>
+                </button>
+                <div className="w-[1px] h-8 bg-slate-200 mx-1 hidden sm:block"></div>
                 <button onClick={exportToPPTX} className="flex items-center gap-2 bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-2xl font-bold transition-all shadow-lg">
                   <Download size={18} /> <span className="hidden sm:inline">PPTX</span>
                 </button>
@@ -443,6 +455,16 @@ const App: React.FC = () => {
                       </button>
                     ))}
                   </div>
+                  
+                  {/* Bottom Navigation in Sidebar */}
+                  <div className="p-4 border-t border-slate-100 bg-white/50">
+                    <button 
+                      onClick={goHome}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-[1.5rem] bg-slate-900 text-white font-black hover:bg-black transition-all shadow-lg"
+                    >
+                      <ArrowLeft size={18} /> Bosh sahifaga qaytish
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -453,8 +475,8 @@ const App: React.FC = () => {
                       <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Slayd: {activeSlide + 1} / {presentation.slides.length}</p>
                    </div>
                    <div className="flex gap-3">
-                      <button disabled={activeSlide === 0} onClick={() => setActiveSlide(prev => prev - 1)} className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-800 transition-all"><ChevronLeft size={28} /></button>
-                      <button disabled={activeSlide === presentation.slides.length - 1} onClick={() => setActiveSlide(prev => prev + 1)} className="w-14 h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center text-white transition-all"><ChevronRight size={28} /></button>
+                      <button disabled={activeSlide === 0} onClick={() => setActiveSlide(prev => prev - 1)} className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-800 transition-all disabled:opacity-30"><ChevronLeft size={28} /></button>
+                      <button disabled={activeSlide === presentation.slides.length - 1} onClick={() => setActiveSlide(prev => prev + 1)} className="w-14 h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center text-white transition-all disabled:opacity-30"><ChevronRight size={28} /></button>
                    </div>
                 </div>
                 <div className="bg-slate-100 rounded-[3rem] p-8 shadow-inner ring-1 ring-slate-200">
@@ -475,6 +497,19 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <footer className="py-12 px-6 border-t border-slate-100 mt-12 bg-white">
+        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+           <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><Sparkles size={20} /></div>
+             <p className="font-black text-slate-900">{settings.footer_brand_name}</p>
+           </div>
+           <p className="text-slate-400 text-sm font-medium">© {new Date().getFullYear()} Barcha huquqlar himoyalangan. Sun'iy intellekt tomonidan yaratilgan.</p>
+           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="p-3 bg-slate-50 rounded-full hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-all">
+             <ArrowLeft size={20} className="rotate-90" />
+           </button>
+        </div>
+      </footer>
 
       <style>{`
         @keyframes progress { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
