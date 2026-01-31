@@ -1,7 +1,5 @@
 {
   "name": "AI Taqdimot Master",
   "description": "Word va Excel fayllardan avtomatik tarzda professional taqdimotlar yaratuvchi AI ilovasi.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "requestFramePermissions": []
 }
