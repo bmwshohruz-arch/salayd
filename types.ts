@@ -23,6 +23,9 @@ export interface SiteSettings {
   upload_box_title: string;
   upload_box_desc: string;
   footer_brand_name: string;
+  hero_image_url?: string;
+  logo_url?: string;
+  bg_image_url?: string;
 }
 
 export enum FileType {

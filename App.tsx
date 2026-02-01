@@ -4,7 +4,7 @@ import {
   Upload, FileText, Layout, Download, FileSpreadsheet, 
   CheckCircle, Loader2, PlayCircle, Eye, Trash2, 
   ChevronLeft, ChevronRight, Share2, Sparkles, 
-  Lock, Settings, X, Save, History, Clock, Home, ArrowLeft, RefreshCcw
+  Lock, Settings, X, Save, History, Clock, Home, ArrowLeft, RefreshCcw, Image as ImageIcon
 } from 'lucide-react';
 import { Slide, Presentation, SiteSettings } from './types';
 import { extractTextFromDocx, extractTextFromXlsx } from './lib/fileParsers';
@@ -22,7 +22,10 @@ const DEFAULT_SETTINGS: SiteSettings = {
   hero_subtitle: "Word yoki Excel faylini yuklang. Bizning sun'iy intellektimiz uning mazmunini o'qib, mavzuga mos rasmlar va professional slaydlar to'plamini tayyorlab beradi.",
   upload_box_title: "Faylni shu yerga tashlang",
   upload_box_desc: "Word yoki Excel fayllari (max 20MB)",
-  footer_brand_name: "AI Taqdimot Master"
+  footer_brand_name: "AI Taqdimot Master",
+  hero_image_url: "",
+  logo_url: "",
+  bg_image_url: ""
 };
 
 const App: React.FC = () => {
@@ -56,7 +59,7 @@ const App: React.FC = () => {
   const fetchSettings = async () => {
     try {
       const { data, error } = await supabase.from('site_settings').select('*').single();
-      if (data && !error) setSettings(data);
+      if (data && !error) setSettings({ ...DEFAULT_SETTINGS, ...data });
     } catch (err) {
       console.warn("Supabase settings error, using defaults.");
     }
@@ -308,25 +311,32 @@ const App: React.FC = () => {
               <button onClick={() => setIsAdminOpen(false)} className="p-2 hover:bg-slate-100 rounded-full"><X /></button>
             </div>
             <div className="space-y-6">
-              {[
-                { label: 'Badge Matni', key: 'hero_badge' },
-                { label: 'Sarlavha (Oddiy)', key: 'hero_title_part1' },
-                { label: 'Sarlavha (Gradient)', key: 'hero_title_gradient' },
-                { label: 'Subtitr', key: 'hero_subtitle', type: 'textarea' },
-                { label: 'Yuklash box sarlavhasi', key: 'upload_box_title' },
-                { label: 'Yuklash box subtitri', key: 'upload_box_desc' },
-                { label: 'Brand nomi', key: 'footer_brand_name' },
-              ].map(field => (
-                <div key={field.key}>
-                  <label className="block text-sm font-bold text-slate-500 mb-1">{field.label}</label>
-                  {field.type === 'textarea' ? (
-                    <textarea value={(settings as any)[field.key]} onChange={e => setSettings({...settings, [field.key]: e.target.value})} className="w-full px-5 py-4 rounded-xl border border-slate-200 h-32 focus:ring-2 focus:ring-indigo-500/20 outline-none" />
-                  ) : (
-                    <input type="text" value={(settings as any)[field.key]} onChange={e => setSettings({...settings, [field.key]: e.target.value})} className="w-full px-5 py-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 outline-none" />
-                  )}
-                </div>
-              ))}
-              <button onClick={handleSaveSettings} disabled={saveLoading} className="w-full bg-emerald-600 text-white py-4 rounded-xl font-black flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { label: 'Badge Matni', key: 'hero_badge' },
+                  { label: 'Sarlavha (Oddiy)', key: 'hero_title_part1' },
+                  { label: 'Sarlavha (Gradient)', key: 'hero_title_gradient' },
+                  { label: 'Subtitr', key: 'hero_subtitle', type: 'textarea' },
+                  { label: 'Yuklash box sarlavhasi', key: 'upload_box_title' },
+                  { label: 'Yuklash box subtitri', key: 'upload_box_desc' },
+                  { label: 'Brand nomi', key: 'footer_brand_name' },
+                  { label: 'Logo Rasm URL', key: 'logo_url', icon: ImageIcon },
+                  { label: 'Hero Rasm URL', key: 'hero_image_url', icon: ImageIcon },
+                  { label: 'Fon Rasm URL', key: 'bg_image_url', icon: ImageIcon },
+                ].map(field => (
+                  <div key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
+                    <label className="flex items-center gap-2 text-sm font-bold text-slate-500 mb-1">
+                      {field.icon && <field.icon size={14} />} {field.label}
+                    </label>
+                    {field.type === 'textarea' ? (
+                      <textarea value={(settings as any)[field.key]} onChange={e => setSettings({...settings, [field.key]: e.target.value})} className="w-full px-5 py-4 rounded-xl border border-slate-200 h-32 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" />
+                    ) : (
+                      <input type="text" value={(settings as any)[field.key] || ''} onChange={e => setSettings({...settings, [field.key]: e.target.value})} className="w-full px-5 py-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button onClick={handleSaveSettings} disabled={saveLoading} className="w-full bg-emerald-600 text-white py-4 rounded-xl font-black flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-50 mt-4">
                 {saveLoading ? <Loader2 className="animate-spin" /> : <Save size={18} />} Saqlash
               </button>
             </div>
@@ -337,8 +347,12 @@ const App: React.FC = () => {
       <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50 transition-all">
         <div className="max-w-screen-2xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity group" onClick={goHome}>
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200 group-hover:scale-105 transition-transform">
-              <Sparkles size={28} fill="currentColor" />
+            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-200 group-hover:scale-105 transition-transform overflow-hidden">
+              {settings.logo_url ? (
+                <img src={settings.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <Sparkles size={28} fill="currentColor" />
+              )}
             </div>
             <div>
               <h1 className="text-xl font-black tracking-tight text-slate-900 leading-none group-hover:text-indigo-600 transition-colors">{settings.footer_brand_name}</h1>
@@ -390,51 +404,66 @@ const App: React.FC = () => {
 
       <main className="max-w-screen-2xl mx-auto px-6 py-10">
         {!presentation ? (
-          <div className="max-w-4xl mx-auto text-center space-y-16 py-12">
-            <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest mb-4">
-                <Sparkles size={14} /> {settings.hero_badge}
+          <div className="relative">
+            {settings.bg_image_url && (
+              <div className="absolute inset-0 -top-20 -mx-6 h-[700px] overflow-hidden pointer-events-none">
+                 <img src={settings.bg_image_url} className="w-full h-full object-cover opacity-10 blur-xl" alt="Background" />
+                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white"></div>
               </div>
-              <h2 className="text-6xl lg:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9]">
-                {settings.hero_title_part1} <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{settings.hero_title_gradient}</span> <br />
-                aylantiring
-              </h2>
-              <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
-                {settings.hero_subtitle}
-              </p>
-            </div>
-
-            <div 
-              onClick={() => !loading && fileInputRef.current?.click()}
-              className={`
-                relative border-4 border-dashed rounded-[3rem] p-24 transition-all cursor-pointer group overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300
-                ${loading ? 'bg-indigo-50 border-indigo-200 pointer-events-none' : 'bg-white border-slate-100 hover:border-indigo-400 hover:bg-indigo-50/20'}
-              `}
-            >
-              <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".docx,.xlsx,.xls" className="hidden" />
-              <div className="flex flex-col items-center relative z-10">
-                {loading ? (
-                  <div className="space-y-8">
-                    <div className="relative flex items-center justify-center">
-                       <div className="absolute w-24 h-24 bg-indigo-500/20 rounded-full animate-ping"></div>
-                       <Loader2 className="w-20 h-20 text-indigo-600 animate-spin" />
-                    </div>
-                    <p className="text-3xl font-black text-slate-900 animate-pulse">{status}</p>
-                    <button onClick={() => window.location.reload()} className="flex items-center gap-2 mx-auto text-slate-400 hover:text-indigo-600 transition-colors font-bold">
-                       <RefreshCcw size={16} /> To'xtatish
-                    </button>
+            )}
+            
+            <div className="max-w-6xl mx-auto py-12 flex flex-col items-center">
+              <div className="text-center space-y-6 mb-16 animate-in fade-in slide-in-from-top-4 duration-1000 relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest mb-4">
+                  <Sparkles size={14} /> {settings.hero_badge}
+                </div>
+                <h2 className="text-6xl lg:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9]">
+                  {settings.hero_title_part1} <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{settings.hero_title_gradient}</span> <br />
+                  aylantiring
+                </h2>
+                <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
+                  {settings.hero_subtitle}
+                </p>
+                
+                {settings.hero_image_url && (
+                  <div className="mt-12 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white max-w-3xl mx-auto">
+                    <img src={settings.hero_image_url} alt="Hero illustration" className="w-full h-auto object-cover max-h-[400px]" />
                   </div>
-                ) : (
-                  <>
-                    <div className="flex -space-x-6 mb-10">
-                      <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-blue-600 shadow-2xl shadow-blue-100 ring-1 ring-slate-100 group-hover:-translate-y-4 transition-transform duration-500"><FileText size={48} /></div>
-                      <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-emerald-600 shadow-2xl shadow-emerald-100 ring-1 ring-slate-100 group-hover:translate-y-4 transition-transform duration-500"><FileSpreadsheet size={48} /></div>
-                    </div>
-                    <p className="text-4xl font-black text-slate-900 mb-4 tracking-tight">{settings.upload_box_title}</p>
-                    <p className="text-slate-400 font-bold text-xl">{settings.upload_box_desc}</p>
-                  </>
                 )}
+              </div>
+
+              <div 
+                onClick={() => !loading && fileInputRef.current?.click()}
+                className={`
+                  relative w-full max-w-4xl border-4 border-dashed rounded-[3rem] p-24 transition-all cursor-pointer group overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 z-10
+                  ${loading ? 'bg-indigo-50 border-indigo-200 pointer-events-none' : 'bg-white border-slate-100 hover:border-indigo-400 hover:bg-indigo-50/20'}
+                `}
+              >
+                <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".docx,.xlsx,.xls" className="hidden" />
+                <div className="flex flex-col items-center relative z-10">
+                  {loading ? (
+                    <div className="space-y-8">
+                      <div className="relative flex items-center justify-center">
+                         <div className="absolute w-24 h-24 bg-indigo-500/20 rounded-full animate-ping"></div>
+                         <Loader2 className="w-20 h-20 text-indigo-600 animate-spin" />
+                      </div>
+                      <p className="text-3xl font-black text-slate-900 animate-pulse">{status}</p>
+                      <button onClick={() => window.location.reload()} className="flex items-center gap-2 mx-auto text-slate-400 hover:text-indigo-600 transition-colors font-bold">
+                         <RefreshCcw size={16} /> To'xtatish
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex -space-x-6 mb-10">
+                        <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-blue-600 shadow-2xl shadow-blue-100 ring-1 ring-slate-100 group-hover:-translate-y-4 transition-transform duration-500"><FileText size={48} /></div>
+                        <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-emerald-600 shadow-2xl shadow-emerald-100 ring-1 ring-slate-100 group-hover:translate-y-4 transition-transform duration-500"><FileSpreadsheet size={48} /></div>
+                      </div>
+                      <p className="text-4xl font-black text-slate-900 mb-4 tracking-tight">{settings.upload_box_title}</p>
+                      <p className="text-slate-400 font-bold text-xl">{settings.upload_box_desc}</p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -505,7 +534,13 @@ const App: React.FC = () => {
       <footer className="py-12 px-6 border-t border-slate-100 mt-12 bg-white">
         <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
            <div className="flex items-center gap-3 cursor-pointer" onClick={goHome}>
-             <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><Sparkles size={20} /></div>
+             <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center overflow-hidden">
+               {settings.logo_url ? (
+                 <img src={settings.logo_url} className="w-full h-full object-cover" alt="Logo" />
+               ) : (
+                 <Sparkles size={20} />
+               )}
+             </div>
              <p className="font-black text-slate-900">{settings.footer_brand_name}</p>
            </div>
            <p className="text-slate-400 text-sm font-medium">© {new Date().getFullYear()} Barcha huquqlar himoyalangan. Sun'iy intellekt tomonidan yaratilgan.</p>
