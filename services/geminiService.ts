@@ -3,12 +3,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Presentation } from "../types";
 
 export const generatePresentationData = async (content: string, fileName: string): Promise<Presentation> => {
-  // Always use process.env.API_KEY directly for initialization
+  // Always use process.env.API_KEY directly for initialization as per system guidelines
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
-    contents: `Siz dunyo miqyosidagi professional prezentatsiya dizaynerisiz. Berilgan "${fileName}" fayli mazmunini tahlil qiling va unga mos vizual taqdimot yarating.
+    contents: `Fayl nomi: "${fileName}"\n\nMatn mazmuni:\n${content.substring(0, 20000)}`,
+    config: {
+      systemInstruction: `Siz dunyo miqyosidagi professional prezentatsiya dizaynerisiz. Berilgan fayl mazmunini tahlil qiling va unga mos vizual taqdimot yarating.
 
 DIQQAT: Har bir slayd mazmuni bo'yicha orqa fonga rasm tanlash uchun juda aniq va vizual tasvirli inglizcha kalit so'zlar bering. 
 Masalan: 
@@ -20,27 +22,7 @@ Qoidalar:
 1. Matnni mantiqiy bloklarga ajrating va har bir slaydni boyitilgan mazmun bilan to'ldiring.
 2. Har bir slayd uchun "imageKeyword" qatoriga rasm qidirish xizmati (Unsplash/Flickr) tushunadigan, 3-4 ta aniq inglizcha kalit so'zlarni vergul bilan ajratib yozing.
 3. Slaydlar soni 8 tadan 15 tagacha bo'lsin.
-4. Har bir slaydda 3-6 ta batafsil bandlar (points) bo'lsin.
-
-Javobni FAQAT ushbu JSON formatida qaytaring:
-{
-  "title": "Taqdimot sarlavhasi",
-  "mainTheme": "modern",
-  "slides": [
-    {
-      "id": "1",
-      "title": "Slayd nomi",
-      "content": ["Batafsil ma'lumot 1", "Batafsil ma'lumot 2", "Batafsil ma'lumot 3"],
-      "layout": "bullet-list",
-      "theme": "creative",
-      "imageKeyword": "cinematic historical scene, epic battle atmosphere"
-    }
-  ]
-}
-
-Matn:
-${content.substring(0, 20000)}`,
-    config: {
+4. Har bir slaydda 3-6 ta batafsil bandlar (points) bo'lsin.`,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -72,6 +54,7 @@ ${content.substring(0, 20000)}`,
   });
 
   try {
+    // Extract text directly from response property as per guidelines
     const data = JSON.parse(response.text || '{}');
     return data as Presentation;
   } catch (e) {
