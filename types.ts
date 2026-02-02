@@ -6,6 +6,7 @@ export interface Slide {
   layout: 'standard' | 'title' | 'two-column' | 'bullet-list' | 'image-text';
   theme?: 'modern' | 'corporate' | 'creative' | 'minimal';
   imageKeyword?: string;
+  customImage?: string;
   footer?: string;
 }
 

@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Upload, FileText, Layout, CheckCircle, Loader2, Trash2, 
   ChevronLeft, ChevronRight, Sparkles, 
-  Lock, Settings, X, Save, History, Clock, Home, ArrowLeft, RefreshCcw, Image as ImageIcon, Eye, Download
+  Lock, Settings, X, Save, History, Clock, Home, ArrowLeft, RefreshCcw, Image as ImageIcon, Eye, Download, Edit3
 } from 'lucide-react';
 import { Slide, Presentation, SiteSettings } from './types';
 import { extractTextFromDocx, extractTextFromXlsx } from './lib/fileParsers';
@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<string>('');
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   
   const [history, setHistory] = useState<any[]>([]);
@@ -167,6 +168,13 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUpdateSlide = (updatedSlide: Slide) => {
+    if (!presentation) return;
+    const newSlides = [...presentation.slides];
+    newSlides[activeSlide] = updatedSlide;
+    setPresentation({ ...presentation, slides: newSlides });
+  };
+
   const handleExportPptx = async () => {
     if (!presentation) return;
     setExportLoading('pptx');
@@ -197,6 +205,7 @@ const App: React.FC = () => {
     setPresentation(null);
     setFile(null);
     setActiveSlide(0);
+    setIsEditing(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -304,12 +313,23 @@ const App: React.FC = () => {
               </div>
               <div className="flex gap-4">
                  <button 
+                  onClick={() => setIsEditing(!isEditing)}
+                  className={`px-6 py-4 rounded-2xl font-black transition-all flex items-center gap-3 border ${
+                    isEditing 
+                      ? 'bg-green-600 border-green-400 hover:bg-green-700' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                  }`}
+                 >
+                   {isEditing ? <CheckCircle size={20} /> : <Edit3 size={20} />}
+                   {isEditing ? "Tahrirlashni tugatish" : "Tahrirlash"}
+                 </button>
+                 <button 
                   onClick={handleExportPptx}
                   disabled={!!exportLoading}
                   className="px-8 py-4 bg-indigo-600 rounded-2xl font-black hover:bg-indigo-700 shadow-xl transition-all flex items-center gap-3 disabled:opacity-50"
                  >
                    {exportLoading === 'pptx' ? <Loader2 className="animate-spin" size={20} /> : <Download size={20} />}
-                   PPTX Yuklab olish
+                   PPTX
                  </button>
                  <button 
                   onClick={handleExportPdf}
@@ -317,7 +337,7 @@ const App: React.FC = () => {
                   className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black hover:bg-white/10 transition-all flex items-center gap-3 disabled:opacity-50"
                  >
                    {exportLoading === 'pdf' ? <Loader2 className="animate-spin" size={20} /> : <FileText size={20} />}
-                   PDF Eksport
+                   PDF
                  </button>
               </div>
             </div>
@@ -325,7 +345,12 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
               <div className="lg:col-span-9">
                 <div id="active-slide-preview" className="w-full">
-                  <SlidePreview slide={presentation.slides[activeSlide]} index={activeSlide} />
+                  <SlidePreview 
+                    slide={presentation.slides[activeSlide]} 
+                    index={activeSlide} 
+                    isEditing={isEditing}
+                    onUpdate={handleUpdateSlide}
+                  />
                 </div>
                 <div className="mt-12 flex items-center justify-center gap-10">
                   <button 
@@ -478,6 +503,7 @@ const App: React.FC = () => {
                     setPresentation(item.data);
                     setActiveSlide(0);
                     setIsHistoryOpen(false);
+                    setIsEditing(false);
                   }}
                   className="p-6 rounded-[2rem] bg-white/5 border border-white/5 hover:border-indigo-500/50 cursor-pointer transition-all group relative"
                 >
